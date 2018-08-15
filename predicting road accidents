@@ -1,13 +1,14 @@
-# Libraries 
 import pandas as pd
 import numpy as np
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 #from sklearn import preprocessing
+
 import seaborn as sns
 #from sklearn import ensemble, tree, linear_model
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.feature_selection import Linear regression
 import matplotlib.pyplot as plt
 
 pd.set_option('display.max_columns', 70) # Since we're dealing with moderately sized dataframe,
@@ -16,6 +17,7 @@ df=pd.read_csv("../input/Kaagle_Upload.csv", sep=",", decimal=",", engine='pytho
 df=df.dropna() # The dataset is huge, therefore, dropping any rows with missing values is fine
 df.head()
 df.isnull().sum().sum()
+df.head()
 
 # First I select variables based on prefrence, then for df2 I add weather related conditions of:
 #'road_surface_conditions','light_conditions','weather_conditions'
@@ -27,10 +29,12 @@ df1 = df[['special_conditions_at_site','pedestrian_movement','age_of_vehicle','s
 df1.replace(-1, np.nan, inplace=True) # -1 should be imputed to NaN to be recognized as missing in the next row
 df1=df1.dropna() # I drop all the rows with missing data once again
 df1.shape
+df1.head()
 
 df2.replace(-1, np.nan, inplace=True) # Same as previously 
 df2=df2.dropna()
 df2.shape
+df2.head()
 
 # Here I took a subset of features from the previous cell. This is so I could narrow it more down / 
 # This can be considered redundant, but was mostly part of the workflow when looking at different variables
@@ -44,6 +48,7 @@ df2 = df2[['special_conditions_at_site','pedestrian_movement','road_surface_cond
 
 df1.shape
 df2.shape
+print("The value of :df2)
 import matplotlib.pyplot as plt
 corrmat = df2.corr()
 f, ax = plt.subplots(figsize=(12, 9))
@@ -59,6 +64,7 @@ cm = np.corrcoef(df2[cols].values.T)
 sns.set(font_scale=1.25)
 hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
 plt.show()
+hm.options.mode.chained_assignment=None;
 #cols2 = ['junction_detail','light_conditions','weather_conditions','casualty_type','day_of_week','junction_control','road_surface_conditions','casualty_severity']
 
 k = 6 #number of variables for heatmap
@@ -84,6 +90,7 @@ from scipy import stats
 sns.distplot(df1['age_of_driver'], fit=norm);
 fig = plt.figure()
 res = stats.probplot(df1['age_of_driver'], plot=plt)
+res.options.mode.chained_assignment=None;
 plt.show()
 df2['age_of_driver'] = np.log1p(df2['age_of_driver']) 
 df2['age_of_vehicle'] = np.log1p(df2['age_of_vehicle'])# standardise the feature
@@ -97,11 +104,12 @@ plt.show()
 df2
 df1= df1[:15000] #keep 1500 to decrease running times
 df2= df2[:15000] #keep 15000
+df2.head()
 
 Y = df2.accident_severity.values
 Y1 = df1.accident_severity.values
-Y
-cols = df2.shape[1]
+
+cols = df2.shape[2]
 X = df2.loc[:, df2.columns != 'accident_severity']
 X1 = df1.loc[:, df1.columns != 'accident_severity']
 X.columns;
@@ -146,7 +154,7 @@ gaussian = GaussianNB()
 gaussian.fit(X_train1, Y_train1)
 Y_pred = gaussian.predict(X_test1)
 acc_gaussian1 = round(gaussian.score(X_test1, Y_test1) * 100, 2)
-acc_gaussian1
+print("acc_gaussian1")
 
 # Perceptron
 
@@ -154,7 +162,7 @@ perceptron = Perceptron()
 perceptron.fit(X_train1, Y_train1)
 Y_pred = perceptron.predict(X_test1)
 acc_perceptron1 = round(perceptron.score(X_test1, Y_test1) * 100, 2)
-acc_perceptron1
+print(acc_perceptron1)
 
 # Linear SVC
 
@@ -227,7 +235,7 @@ perceptron = Perceptron()
 perceptron.fit(X_train, Y_train)
 Y_pred = perceptron.predict(X_test)
 acc_perceptron = round(perceptron.score(X_test, Y_test) * 100, 2)
-acc_perceptron
+acc_perceptron.head()
 
 # Linear SVC
 
@@ -281,6 +289,7 @@ models = pd.DataFrame({
               acc_random_forest, acc_gaussian, acc_perceptron, 
               acc_sgd, acc_linear_svc, acc_decision_tree]})
 models.sort_values(by='Score', ascending=False)
+models.options.mode.chained_assignment=None;
 # Confusion matrix with random forest
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
@@ -288,11 +297,12 @@ x,y = df1.loc[:,df1.columns != 'accident_severity'], df1.loc[:,'accident_severit
 x_train,x_test,y_train,y_test = train_test_split(x,y,test_size = 0.3,random_state = 1)
 rf = RandomForestClassifier(random_state = 4)
 rf.fit(x_train,y_train)
+rf.options.mode.chained_assignment=None;
 y_pred = rf.predict(x_test)
 cm = confusion_matrix(y_test,y_pred)
 print('Confusion matrix: \n',cm)
 print('Classification report: \n',classification_report(y_test,y_pred))
-y_test.value_counts()
+y_test.value_counts(2)
 # Confusion matrix with random forest
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
@@ -302,8 +312,10 @@ rf = RandomForestClassifier(random_state = 4)
 rf.fit(x_train,y_train)
 y_pred = rf.predict(x_test)
 cm = confusion_matrix(y_test,y_pred)
+cm.options.mode.chained_assignment=None;
 print('Confusion matrix: \n',cm)
 print('Classification report: \n',classification_report(y_test,y_pred))
 y_test.value_counts(
 sns.heatmap(cm,annot=True,fmt="d") 
+sns.options.mode.chained_assignment=None;
 plt.show()
