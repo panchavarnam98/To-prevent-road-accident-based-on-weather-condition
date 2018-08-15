@@ -1,1 +1,1 @@
-# To-prevent-road-accident-based-on-weather-condition
+In most states the road accident is a year-over-year.This is a way to prevent this,the cause of the accident is on the road due to the condition and the natural risks of the roads.Besides,the driving force of the driver is one reason.This project is designed to prevent it.The main objective is to prevent the road accident from knowing the nature of the natural hazard and driving driver.
